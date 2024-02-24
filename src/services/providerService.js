@@ -1,11 +1,15 @@
-import axios from '../api/axios';
+import axiosInstance from '../api/axios';
 
-export const fetchProviders = async () => {
-    try {
-        const response = await axios.get('https://data.cityofnewyork.us/resource/7btz-mnc8.json?$limit=2');
-        console.log(response.data)
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+export const fetchProviders = async (attribute, searchTerm) => {
+  try{
+    const queryParams = new URLSearchParams ({
+      [attribute]: searchTerm,
+    }).toString();
+    const requestUrl = `7btz-mnc8.json?${queryParams}`;
+    const response = await axiosInstance.get(requestUrl);
+    return response.data;
+  } catch (error) {
+    console.error("Error occured while fetching providers:", error);
+    throw error;
+  }
 };
