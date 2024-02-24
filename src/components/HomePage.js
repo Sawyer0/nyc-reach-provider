@@ -1,4 +1,5 @@
 import { useState } from "react";
+import MapView from "./MapView";
 import SearchBar from "./SearchBar";
 import { fetchProviders } from "../services/providerService";
 
@@ -29,18 +30,26 @@ const HomePage = () => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <select value={searchAttribute} onChange={(e) => handleAttributeChange(e.target.value)}>
+        <select
+          value={searchAttribute}
+          onChange={(e) => handleAttributeChange(e.target.value)}
+        >
           <option value="provider_first_name">First Name</option>
           <option value="provider_last_name">Last Name</option>
           <option value="primary_specialty">Specialty</option>
+          <option value="practice_borough">Borough</option>
         </select>
-        <SearchBar searchTerm={searchTerm} onSearchChange={handleSearchChange}/>
+        <SearchBar
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+        />
         <button>Search</button>
       </form>
+      <MapView providers={providers} />
       <div>
         {providers.map((provider) => (
           <div
-            key={`${provider.provider_first_name}-${provider.provider_last_name}-${provider.primary_specialty}`}
+            key={`${provider.provider_first_name}-${provider.provider_last_name}-${provider.primary_specialty}-${provider.practice_borough}`}
           >
             {provider.site_name}
             {provider.organization_type}
@@ -50,6 +59,7 @@ const HomePage = () => {
             {provider.practice_name}
             {provider.practice_mailing_address}
             {provider.practice_zip_code}
+            {provider.practice_borough}
           </div>
         ))}
       </div>
