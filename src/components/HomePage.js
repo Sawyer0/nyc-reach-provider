@@ -6,7 +6,16 @@ import { fetchProviders } from "../services/providerService";
 const HomePage = () => {
   const [providers, setProviders] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
   const [searchAttribute, setSearchAttribute] = useState("provider_first_name");
+
+  const handleAttributeChange = (attribute) => {
+    setSearchAttribute(attribute);
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,17 +23,10 @@ const HomePage = () => {
       const data = await fetchProviders(searchAttribute, searchTerm);
       setProviders(data);
       setSearchTerm("");
+      setIsSearchSubmitted(true);
     } catch (error) {
       console.error("Error fetching providers: ", error);
     }
-  };
-
-  const handleSearchChange = (value) => {
-    setSearchTerm(value);
-  };
-
-  const handleAttributeChange = (attribute) => {
-    setSearchAttribute(attribute);
   };
 
   return (
@@ -45,7 +47,12 @@ const HomePage = () => {
         />
         <button>Search</button>
       </form>
-      <MapView providers={providers} />
+      <MapView
+        searchAttribute={searchAttribute}
+        providers={providers}
+        isSearchSubmitted={isSearchSubmitted}
+        setIsSearchSubmitted={setIsSearchSubmitted}
+      />
       <div>
         {providers.map((provider) => (
           <div
