@@ -1,15 +1,27 @@
 import axios from "axios";
 import axiosInstance from "../api/axios";
 
-const mapboxGeocode = async (address) => {
+const endpoint = "mapbox.places";
+
+const mapboxGeocode = async (address, borough, zipCode) => {
   const accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-    address
-  )}.json`;
+
+  const bbox = [-74.25909, 40.477399, -73.700272, 40.916178];
+  const bboxString = bbox.join(',');
+
+  const fullAddress = `${address}, ${borough}, NY ${zipCode}`;
+
+  const encodedAddress = encodeURIComponent(fullAddress);
+
+  const url = `https://api.mapbox.com/geocoding/v5/${endpoint}/${encodedAddress}.json`;
 
   try {
     const response = await axios.get(url, {
-      params: { access_token: accessToken },
+      params: {
+        access_token: accessToken,
+        bbox: bboxString,
+        limit: 10,
+      },
     });
 
     if (response.data.features && response.data.features.length > 0) {
