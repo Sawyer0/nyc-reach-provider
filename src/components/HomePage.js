@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useContext } from "react";
 import Header from "./Header";
-import SearchForm from "./SearchForm";
 import MapView from "./MapView";
+import SearchForm from "./SearchForm";
 import ProviderDetails from "./ProviderDetails";
+import { ProviderContext } from "../ProviderContext";
 
-const HomePage = (searchAttribute, searchTerm) => {
-  const [providers, setProviders] = useState([]);
-  const [isSearchSubmitted, setIsSearchSubmitted] = useState(false);
+const HomePage = () => {
+  const { providers, setProviders, isSearchSubmitted, setIsSearchSubmitted } =
+    useContext(ProviderContext);
 
   return (
     <div>
@@ -17,8 +18,6 @@ const HomePage = (searchAttribute, searchTerm) => {
       />
       <ProviderDetails providers={providers} />
       <MapView
-        searchAttribute={searchAttribute}
-        searchTerm={searchTerm}
         isSearchSubmitted={isSearchSubmitted}
         providers={providers}
         setIsSearchSubmitted={setIsSearchSubmitted}
