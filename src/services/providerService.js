@@ -7,7 +7,7 @@ const mapboxGeocode = async (address, borough, zipCode) => {
   const accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
   const bbox = [-74.25909, 40.477399, -73.700272, 40.916178];
-  const bboxString = bbox.join(',');
+  const bboxString = bbox.join(",");
 
   const fullAddress = `${address}, ${borough}, NY ${zipCode}`;
 
