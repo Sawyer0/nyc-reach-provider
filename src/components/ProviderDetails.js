@@ -1,3 +1,5 @@
+import {memo} from 'react';
+
 const ProviderDetails = ({ providers }) => {
   return (
     <div>
@@ -22,4 +24,4 @@ const ProviderDetails = ({ providers }) => {
   );
 };
 
-export default ProviderDetails;
+export default memo(ProviderDetails);
