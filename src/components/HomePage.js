@@ -3,7 +3,7 @@ import Header from "./Header";
 import MapView from "./MapView";
 import SearchForm from "./SearchForm";
 import ProviderDetails from "./ProviderDetails";
-import { ProviderContext } from "../ProviderContext";
+import { ProviderContext } from "../context/ProviderContext";
 
 const HomePage = () => {
   const { providers, setProviders, isSearchSubmitted, setIsSearchSubmitted } =
