@@ -1,9 +1,10 @@
-import { useContext } from "react";
+import React, { Suspense, useContext } from "react";
 import Header from "./Header";
-import MapView from "./MapView";
-import SearchForm from "./SearchForm";
-import ProviderDetails from "./ProviderDetails";
 import { ProviderContext } from "../context/ProviderContext";
+
+const SearchForm = React.lazy(() => import("./SearchForm"));
+const ProviderDetails = React.lazy(() => import("./ProviderDetails"));
+const MapView = React.lazy(() => import("./MapView"));
 
 const HomePage = () => {
   const { providers, setProviders, isSearchSubmitted, setIsSearchSubmitted } =
@@ -12,16 +13,18 @@ const HomePage = () => {
   return (
     <div>
       <Header />
-      <SearchForm
-        setProviders={setProviders}
-        setIsSearchSubmitted={setIsSearchSubmitted}
-      />
-      <ProviderDetails providers={providers} />
-      <MapView
-        isSearchSubmitted={isSearchSubmitted}
-        providers={providers}
-        setIsSearchSubmitted={setIsSearchSubmitted}
-      />
+      <Suspense fallback={<div>Loading...</div>}>
+        <SearchForm
+          setProviders={setProviders}
+          setIsSearchSubmitted={setIsSearchSubmitted}
+        />
+        <ProviderDetails providers={providers} />
+        <MapView
+          isSearchSubmitted={isSearchSubmitted}
+          providers={providers}
+          setIsSearchSubmitted={setIsSearchSubmitted}
+        />
+      </Suspense>
     </div>
   );
 };
