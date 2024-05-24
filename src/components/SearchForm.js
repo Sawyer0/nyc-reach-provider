@@ -1,29 +1,14 @@
-import { useState } from "react";
-import { fetchProviders } from "../services/providerService";
+import useSearchForm from "../hooks/useSearchForm";
 
 const SearchForm = ({ setProviders, setIsSearchSubmitted }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchAttribute, setSearchAttribute] = useState("provider_first_name");
+  const {
+    searchTerm,
+    searchAttribute,
+    handleAttributeChange,
+    handleSearchChange,
+    handleSubmit,
+  } = useSearchForm(setProviders, setIsSearchSubmitted);
 
-  const handleAttributeChange = (newAttribute) => {
-    setSearchAttribute(newAttribute);
-  };
-
-  const handleSearchChange = (value) => {
-    setSearchTerm(value);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const providersData = await fetchProviders(searchAttribute, searchTerm);
-      setProviders(providersData);
-      setSearchTerm("");
-      setIsSearchSubmitted(true);
-    } catch (error) {
-      console.error("Error fetching providers:", error);
-    }
-  };
 
   return (
     <div className="flex flex-col max-w-md mx-auto p-8 bg-white shadow-xl rounded-lg">
