@@ -1,94 +1,64 @@
-import "../styles/styles.css";
-import { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import "./MapView.css";
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
-const MapView = ({
-  providers,
-  searchAttribute,
-  searchTerm,
-  isSearchSubmitted,
-  setIsSearchSubmitted,
-}) => {
-  const mapContainerRef = useRef(null);
-  const mapRef = useRef(null);
+const MapView = ({ providers }) => {
+  const mapContainer = useRef(null);
+  const map = useRef(null);
   const markersRef = useRef([]);
-  const popupRef = useRef(
-    new mapboxgl.Popup({ offset: 15, closeButton: false, closeOnClick: false })
-  );
 
   useEffect(() => {
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: "mapbox://styles/mapbox/streets-v11",
-      center: [-74.006, 40.7128],
-      zoom: 12,
-    });
-
-    const popup = popupRef.current;
-
-    return () => {
-      markersRef.current.forEach((marker) => marker.remove());
-      popup.remove();
-      mapRef.current?.remove();
-    };
-  }, []);
-
-  const memoizedBounds = useMemo(() => {
-    const bounds = new mapboxgl.LngLatBounds();
-    providers.forEach((provider) => {
-      if (provider.longitude && provider.latitude) {
-        bounds.extend([provider.longitude, provider.latitude]);
-      }
-    });
-    return bounds;
-  }, [providers]);
-
-  useEffect(() => {
-    if (!mapRef.current || providers.length === 0) return;
+    if (!map.current) {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/streets-v12",
+        center: [-73.935242, 40.73061],
+        zoom: 10,
+      });
+    }
 
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    providers.forEach((provider) => {
-      if (provider.longitude && provider.latitude) {
-        const el = document.createElement("div");
-        el.className = "marker";
+    if (providers && providers.length > 0) {
+      console.log("Providers for mapping:", providers);
 
-        const marker = new mapboxgl.Marker(el, { anchor: "bottom" })
-          .setLngLat([provider.longitude, provider.latitude])
-          .addTo(mapRef.current);
-
-        marker.getElement().addEventListener("mouseenter", () => {
-          popupRef.current
+      providers.forEach((provider) => {
+        if (provider.longitude && provider.latitude) {
+          const marker = new mapboxgl.Marker()
             .setLngLat([provider.longitude, provider.latitude])
-            .setHTML(
-              `<h3>${provider.practice_name}</h3><p>${provider.practice_mailing_address}</p>`
+            .setPopup(
+              new mapboxgl.Popup({ offset: 25 }).setHTML(
+                `<h3>${provider.practice_name || "Provider"}</h3>
+                                     <p>${provider.practice_address || ""}</p>
+                                     <p>${provider.practice_borough || ""}</p>`
+              )
             )
-            .addTo(mapRef.current);
-        });
+            .addTo(map.current);
 
-        marker.getElement().addEventListener("mouseleave", () => {
-          popupRef.current.remove();
-        });
+          markersRef.current.push(marker);
+        }
+      });
 
-        markersRef.current.push(marker);
+      if (markersRef.current.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds();
+        providers.forEach((provider) => {
+          if (provider.longitude && provider.latitude) {
+            bounds.extend([provider.longitude, provider.latitude]);
+          }
+        });
+        map.current.fitBounds(bounds, { padding: 50 });
       }
-    });
-
-    if (!memoizedBounds.isEmpty()) {
-      mapRef.current.fitBounds(memoizedBounds, { padding: 50 });
     }
-  }, [providers, memoizedBounds]);
+  }, [providers]);
 
   return (
-    <div
-      className="map-container"
-      ref={mapContainerRef}
-      style={{ height: "100vh" }}
-    />
+    <div className="map-container">
+      <div ref={mapContainer} className="map" />
+    </div>
   );
 };
 

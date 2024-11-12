@@ -1,61 +1,64 @@
 import axios from "axios";
-import axiosInstance from "../api/axios";
 
-const endpoint = "mapbox.places";
+const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const MAPBOX_GEOCODING_URL = process.env.REACT_APP_MAPBOX_GEOCODING_URL;
+const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
-const mapboxGeocode = async (address, borough, zipCode) => {
-  const accessToken = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
-
-  const bbox = [-74.25909, 40.477399, -73.700272, 40.916178];
-  const bboxString = bbox.join(",");
-
-  const fullAddress = `${address}, ${borough}, NY ${zipCode}`;
-
-  const encodedAddress = encodeURIComponent(fullAddress);
-
-  const url = `https://api.mapbox.com/geocoding/v5/${endpoint}/${encodedAddress}.json`;
-
+export const fetchProviders = async (searchAttribute, searchTerm) => {
   try {
-    const response = await axios.get(url, {
-      params: {
-        access_token: accessToken,
-        bbox: bboxString,
-        limit: 10,
-      },
-    });
-
-    if (response.data.features && response.data.features.length > 0) {
-      const [longitude, latitude] = response.data.features[0].center;
-      return { longitude, latitude };
+    if (!BASE_URL || !MAPBOX_GEOCODING_URL || !MAPBOX_TOKEN) {
+      console.error("Missing environment variables");
+      throw new Error("Configuration error");
     }
-    return { longitude: null, latitude: null };
-  } catch (error) {
-    console.error("Error during Mapbox geocoding:", error);
-    return { longitude: null, latitude: null };
-  }
-};
 
-export const fetchProviders = async (attribute, searchTerm) => {
-  try {
-    const queryParams = new URLSearchParams({
-      [attribute]: searchTerm,
-    }).toString();
-    const response = await axiosInstance.get(`/7btz-mnc8.json?${queryParams}`);
+    const params = {
+      $where: `practice_borough='${searchTerm}'`,
+      $limit: 5,
+    };
 
-    const providersWithCoords = await Promise.all(
+    console.log("Fetching with params:", params);
+    const response = await axios.get(BASE_URL, { params });
+
+    const providersWithCoordinates = await Promise.all(
       response.data.map(async (provider) => {
-        if (!provider.longitude || !provider.latitude) {
-          const fullAddress = `${provider.practice_name}, ${provider.practice_mailing_address}, ${provider.practice_borough}, NY ${provider.practice_zip_code}`;
-          const coords = await mapboxGeocode(fullAddress);
-          return { ...provider, ...coords };
+        try {
+          if (provider.practice_zip_code) {
+            const geocodeResponse = await axios.get(
+              `${MAPBOX_GEOCODING_URL}/${provider.practice_zip_code}.json`,
+              {
+                params: {
+                  access_token: MAPBOX_TOKEN,
+                  limit: 1,
+                  country: "US",
+                  types: "postcode",
+                  proximity: "-73.935242,40.730610",
+                },
+              }
+            );
+
+            if (
+              geocodeResponse.data.features &&
+              geocodeResponse.data.features.length > 0
+            ) {
+              const [lng, lat] = geocodeResponse.data.features[0].center;
+              return {
+                ...provider,
+                longitude: lng,
+                latitude: lat,
+              };
+            }
+          }
+          return provider;
+        } catch (error) {
+          console.error("Geocoding error:", error);
+          return provider;
         }
-        return provider;
       })
     );
 
-    return providersWithCoords.filter((p) => p.longitude && p.latitude);
+    return providersWithCoordinates;
   } catch (error) {
-    console.error("Error occurred while fetching providers:", error);
+    console.error("Error details:", error.response?.data || error);
     throw error;
   }
 };
