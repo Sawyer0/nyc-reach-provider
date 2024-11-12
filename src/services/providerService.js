@@ -1,22 +1,22 @@
 import axios from "axios";
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
-const MAPBOX_GEOCODING_URL = process.env.REACT_APP_MAPBOX_GEOCODING_URL;
+const MAPBOX_GEOCODING_URL = process.env.REACT_MAPBOX_GEOCODING_URL;
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
 export const fetchProviders = async (searchAttribute, searchTerm) => {
   try {
     if (!BASE_URL || !MAPBOX_GEOCODING_URL || !MAPBOX_TOKEN) {
-      console.error("Missing environment variables");
-      throw new Error("Configuration error");
+      console.error('Missing environment variables');
+      throw new Error('Configuration error');
     }
 
     const params = {
       $where: `practice_borough='${searchTerm}'`,
-      $limit: 5,
+      $limit: 5
     };
 
-    console.log("Fetching with params:", params);
+    console.log('Fetching with params:', params);
     const response = await axios.get(BASE_URL, { params });
 
     const providersWithCoordinates = await Promise.all(
@@ -31,8 +31,8 @@ export const fetchProviders = async (searchAttribute, searchTerm) => {
                   limit: 1,
                   country: "US",
                   types: "postcode",
-                  proximity: "-73.935242,40.730610",
-                },
+                  proximity: "-73.935242,40.730610"
+                }
               }
             );
 
@@ -44,13 +44,13 @@ export const fetchProviders = async (searchAttribute, searchTerm) => {
               return {
                 ...provider,
                 longitude: lng,
-                latitude: lat,
+                latitude: lat
               };
             }
           }
           return provider;
         } catch (error) {
-          console.error("Geocoding error:", error);
+          console.error('Geocoding error:', error);
           return provider;
         }
       })
@@ -58,7 +58,7 @@ export const fetchProviders = async (searchAttribute, searchTerm) => {
 
     return providersWithCoordinates;
   } catch (error) {
-    console.error("Error details:", error.response?.data || error);
+    console.error('Error details:', error.response?.data || error);
     throw error;
   }
 };
