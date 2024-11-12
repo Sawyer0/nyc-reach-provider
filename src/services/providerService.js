@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
-const MAPBOX_GEOCODING_URL = process.env.REACT_MAPBOX_GEOCODING_URL;
+const MAPBOX_GEOCODING_URL = process.env.REACT_APP_MAPBOX_GEOCODING_URL;
 const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_ACCESS_TOKEN;
 
 export const fetchProviders = async (searchAttribute, searchTerm) => {
